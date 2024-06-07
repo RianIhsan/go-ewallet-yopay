@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v2/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"time"
 )
 
 func BootDatabase(cnf config.Config) *gorm.DB {
@@ -17,6 +18,16 @@ func BootDatabase(cnf config.Config) *gorm.DB {
 		log.Fatal("Failed to open database", err.Error())
 		return nil
 	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatal("Failed to get sqlDB from gorm.DB", err.Error())
+		return nil
+	}
+	sqlDB.SetMaxIdleConns(10)                  // Mengatur jumlah koneksi idle maksimum
+	sqlDB.SetMaxOpenConns(100)                 // Mengatur jumlah koneksi maksimum yang bisa dibuka
+	sqlDB.SetConnMaxLifetime(time.Hour)        // Mengatur waktu maksimum sebuah koneksi dapat digunakan (1 jam)
+	sqlDB.SetConnMaxIdleTime(10 * time.Minute) // Mengatur waktu idle maksimum sebuah koneksi (10 menit)
+
 	log.Info("Database connected")
 	return db
 }
