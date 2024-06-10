@@ -6,6 +6,7 @@ import (
 	authHandler "github.com/RianIhsan/go-topup-midtrans/feature/auth/handler"
 	authRepo "github.com/RianIhsan/go-topup-midtrans/feature/auth/repository"
 	authService "github.com/RianIhsan/go-topup-midtrans/feature/auth/service"
+	userHandler "github.com/RianIhsan/go-topup-midtrans/feature/users/handler"
 	userRepo "github.com/RianIhsan/go-topup-midtrans/feature/users/repository"
 	userService "github.com/RianIhsan/go-topup-midtrans/feature/users/service"
 	"github.com/RianIhsan/go-topup-midtrans/router"
@@ -32,6 +33,7 @@ func main() {
 	db.MigrateTable(initDB)
 	userRepository := userRepo.NewUserRepository(initDB)
 	userService := userService.NewUserService(userRepository)
+	userHandler := userHandler.NewUserHandler(userService)
 	hashing := hashing.NewHash()
 	jwtInterface := jwtToken.NewJWT(initConfig.Secret)
 	authRepository := authRepo.NewAuthRepository(initDB)
@@ -46,6 +48,7 @@ func main() {
 
 	// router
 	router.BootAuthRoute(app, authHandler)
+	router.BootUserRoute(app, userHandler, jwtInterface, userService)
 	addr := fmt.Sprintf(":%d", initConfig.AppPort)
 	if err := app.Listen(addr).Error(); err != addr {
 		panic("application failed to start")
