@@ -16,3 +16,7 @@ Sebauh Mini E-wallet yang sudah terintegrasi dengan payment gateway,
 - Argon
 - Midtrans
 
+## Next Fitur
+- Withdraw
+- Transfer
+- Paylater
