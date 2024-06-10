@@ -1,6 +1,9 @@
 package users
 
-import "github.com/RianIhsan/go-topup-midtrans/entities"
+import (
+	"github.com/RianIhsan/go-topup-midtrans/entities"
+	"github.com/gofiber/fiber/v2"
+)
 
 type (
 	UserRepositoryInterface interface {
@@ -10,5 +13,8 @@ type (
 	UserServiceInterface interface {
 		GetId(id int) (*entities.MstUser, error)
 		GetEmail(email string) (*entities.MstUser, error)
+	}
+	UserHandlerInterface interface {
+		GetCurrentUser(c *fiber.Ctx) error
 	}
 )
