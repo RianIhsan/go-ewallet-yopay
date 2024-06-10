@@ -8,5 +8,5 @@ import (
 func BootAuthRoute(app *fiber.App, handler auth.AuthHandlerInterface) {
 	authGroup := app.Group("/v1/auth")
 	authGroup.Post("/register", handler.Register)
-	//authGroup.Post("/login", handler.Login)
+	authGroup.Post("/login", handler.Login)
 }
