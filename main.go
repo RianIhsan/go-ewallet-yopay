@@ -11,6 +11,7 @@ import (
 	"github.com/RianIhsan/go-topup-midtrans/router"
 	"github.com/RianIhsan/go-topup-midtrans/utils/db"
 	"github.com/RianIhsan/go-topup-midtrans/utils/hashing"
+	"github.com/RianIhsan/go-topup-midtrans/utils/jwtToken"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
@@ -32,8 +33,9 @@ func main() {
 	userRepository := userRepo.NewUserRepository(initDB)
 	userService := userService.NewUserService(userRepository)
 	hashing := hashing.NewHash()
+	jwtInterface := jwtToken.NewJWT(initConfig.Secret)
 	authRepository := authRepo.NewAuthRepository(initDB)
-	authService := authService.NewAuthService(authRepository, userService, hashing)
+	authService := authService.NewAuthService(authRepository, userService, hashing, jwtInterface)
 	authHandler := authHandler.NewAuthHandler(authService)
 
 	app.Get("/", func(c *fiber.Ctx) error {
@@ -46,6 +48,6 @@ func main() {
 	router.BootAuthRoute(app, authHandler)
 	addr := fmt.Sprintf(":%d", initConfig.AppPort)
 	if err := app.Listen(addr).Error(); err != addr {
-		panic("Appilaction failed to start")
+		panic("application failed to start")
 	}
 }

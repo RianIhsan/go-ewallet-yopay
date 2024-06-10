@@ -12,8 +12,10 @@ type (
 	}
 	AuthServiceInterface interface {
 		Register(newUser *dto.RegisterRequest) (*entities.MstUser, error)
+		Login(user *dto.LoginRequest) (*entities.MstUser, string, error)
 	}
 	AuthHandlerInterface interface {
 		Register(c *fiber.Ctx) error
+		Login(c *fiber.Ctx) error
 	}
 )
