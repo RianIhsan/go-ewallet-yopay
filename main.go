@@ -6,6 +6,9 @@ import (
 	authHandler "github.com/RianIhsan/go-topup-midtrans/feature/auth/handler"
 	authRepo "github.com/RianIhsan/go-topup-midtrans/feature/auth/repository"
 	authService "github.com/RianIhsan/go-topup-midtrans/feature/auth/service"
+	topupHandler "github.com/RianIhsan/go-topup-midtrans/feature/topup/handler"
+	topupRepo "github.com/RianIhsan/go-topup-midtrans/feature/topup/repository"
+	topupService "github.com/RianIhsan/go-topup-midtrans/feature/topup/service"
 	userHandler "github.com/RianIhsan/go-topup-midtrans/feature/users/handler"
 	userRepo "github.com/RianIhsan/go-topup-midtrans/feature/users/repository"
 	userService "github.com/RianIhsan/go-topup-midtrans/feature/users/service"
@@ -13,6 +16,8 @@ import (
 	"github.com/RianIhsan/go-topup-midtrans/utils/db"
 	"github.com/RianIhsan/go-topup-midtrans/utils/hashing"
 	"github.com/RianIhsan/go-topup-midtrans/utils/jwtToken"
+	"github.com/RianIhsan/go-topup-midtrans/utils/payment"
+	generator "github.com/RianIhsan/go-topup-midtrans/utils/random"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
@@ -31,14 +36,22 @@ func main() {
 	var initConfig = config.BootConfig()
 	initDB := db.BootDatabase(*initConfig)
 	db.MigrateTable(initDB)
+	jwtInterface := jwtToken.NewJWT(initConfig.Secret)
+	hashing := hashing.NewHash()
+	coreApi := payment.InitMidtransCore(*initConfig)
+	generatorId := generator.NewGeneratorUUID(initDB)
+
 	userRepository := userRepo.NewUserRepository(initDB)
 	userService := userService.NewUserService(userRepository)
 	userHandler := userHandler.NewUserHandler(userService)
-	hashing := hashing.NewHash()
-	jwtInterface := jwtToken.NewJWT(initConfig.Secret)
+
 	authRepository := authRepo.NewAuthRepository(initDB)
 	authService := authService.NewAuthService(authRepository, userService, hashing, jwtInterface)
 	authHandler := authHandler.NewAuthHandler(authService)
+
+	topUpRepository := topupRepo.NewTopUpRepository(initDB, coreApi)
+	topUpService := topupService.NewTopUpService(topUpRepository, userService, generatorId)
+	topUpHandler := topupHandler.NewTopUpHandler(topUpService)
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
@@ -49,6 +62,7 @@ func main() {
 	// router
 	router.BootAuthRoute(app, authHandler)
 	router.BootUserRoute(app, userHandler, jwtInterface, userService)
+	router.BootTopUpBalanceRoute(app, topUpHandler, jwtInterface, userService)
 	addr := fmt.Sprintf(":%d", initConfig.AppPort)
 	if err := app.Listen(addr).Error(); err != addr {
 		panic("application failed to start")
