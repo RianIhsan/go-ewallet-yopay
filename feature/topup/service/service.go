@@ -20,6 +20,32 @@ type topUpService struct {
 	generatorID generator.GeneratorInterface
 }
 
+func (t topUpService) TransferBalance(fromUserID int, request dto.TransferBalanceRequest) error {
+	fromUser, err := t.userService.GetId(fromUserID)
+	if err != nil {
+		return errors.New("user not found")
+	}
+	toUser, err := t.userService.GetUserByPhone(request.Phone)
+	if err != nil {
+		return errors.New("user not found")
+	}
+	if fromUser.TotalBalance < request.Amount {
+		return errors.New("insufficient balance")
+	}
+	fromUser.TotalBalance -= request.Amount
+	toUser.TotalBalance += request.Amount
+	err = t.topUpRepo.UpdateUserTotalBalance(fromUserID, fromUser.TotalBalance)
+	if err != nil {
+		return errors.New("failed to update user balance")
+	}
+	err = t.topUpRepo.UpdateTotalBalanceByPhone(toUser.Phone, toUser.TotalBalance)
+	if err != nil {
+		return errors.New("failed to update user balance")
+	}
+	return nil
+
+}
+
 func (t topUpService) ConfirmPayment(orderID string) error {
 	balance, err := t.topUpRepo.GetBalanceByOrderId(orderID)
 	if err != nil {

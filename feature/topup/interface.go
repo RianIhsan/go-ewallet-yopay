@@ -19,6 +19,7 @@ type (
 		ConfirmPayment(orderID, paymentStatus string) error
 		GetBalanceByOrderId(orderID string) (*entities.MstBalance, error)
 		UpdateUserTotalBalance(userID int, totalBalance float64) error
+		UpdateTotalBalanceByPhone(phone string, totalBalance float64) error
 	}
 	TopUpServiceInterface interface {
 		CreateTopUp(userId int64, req *dto.TopUpReq, bank midtrans.Bank) (interface{}, error)
@@ -28,10 +29,12 @@ type (
 		CancelPayment(orderID string) error
 		CallBack(notifPayload map[string]interface{}) error
 		GetTotalBalanceUser(userID int) (float64, error)
+		TransferBalance(fromUserID int, request dto.TransferBalanceRequest) error
 	}
 	TopUpHandlerInterface interface {
 		CreateTopUp(ctx *fiber.Ctx) error
 		CallBack(ctx *fiber.Ctx) error
 		GetTotalBalance(ctx *fiber.Ctx) error
+		TransferBalance(ctx *fiber.Ctx) error
 	}
 )

@@ -78,6 +78,26 @@ func (t *topUpHandler) CreateTopUp(ctx *fiber.Ctx) error {
 	}
 }
 
+func (t *topUpHandler) TransferBalance(ctx *fiber.Ctx) error {
+	currentUser, _ := ctx.Locals("CurrentUser").(*entities.MstUser)
+	if currentUser == nil {
+		return response.SendStatusUnauthorized(ctx, "access denied")
+	}
+
+	var payload dto.TransferBalanceRequest
+	if err := ctx.BodyParser(&payload); err != nil {
+		return response.SendStatusBadRequest(ctx, "invalid request")
+	}
+	if err := validator.ValidateStruct(payload); err != nil {
+		return response.SendStatusBadRequest(ctx, "error validating payload")
+	}
+	err := t.topUpService.TransferBalance(currentUser.Id, payload)
+	if err != nil {
+		return response.SendStatusBadRequest(ctx, "failed to transfer balance: "+err.Error())
+	}
+	return response.SendStatusOkResponse(ctx, "success transfer balance")
+}
+
 func NewTopUpHandler(topUpService topup.TopUpServiceInterface) topup.TopUpHandlerInterface {
 	return &topUpHandler{
 		topUpService: topUpService,
