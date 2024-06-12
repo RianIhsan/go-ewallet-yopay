@@ -26,6 +26,14 @@ func (u userService) GetEmail(email string) (*entities.MstUser, error) {
 	return result, nil
 }
 
+func (u userService) GetUserByPhone(phone string) (*entities.MstUser, error) {
+	result, err := u.repo.FindUserByPhone(phone)
+	if err != nil {
+		return nil, errors.New("phone number not found")
+	}
+	return result, nil
+}
+
 func NewUserService(repo users.UserRepositoryInterface) users.UserServiceInterface {
 	return &userService{repo}
 }

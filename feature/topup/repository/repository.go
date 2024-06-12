@@ -114,6 +114,16 @@ func (t *topUpRepo) UpdateUserTotalBalance(userID int, totalBalance float64) err
 		Error
 }
 
+func (t *topUpRepo) UpdateTotalBalanceByPhone(phone string, totalBalance float64) error {
+	if err := t.db.Model(&entities.MstUser{}).
+		Where("phone = ? AND deleted_at is NULL", phone).
+		Update("total_balance", totalBalance).
+		Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func NewTopUpRepository(db *gorm.DB, coreClient coreapi.Client) topup.TopUpRespositoryInterface {
 	return &topUpRepo{
 		db:         db,

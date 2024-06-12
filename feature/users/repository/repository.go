@@ -32,6 +32,17 @@ func (r userRepository) FindId(id int) (*entities.MstUser, error) {
 	return user, nil
 }
 
+func (r userRepository) FindUserByPhone(phone string) (*entities.MstUser, error) {
+	var user *entities.MstUser
+	if err := r.db.Table("mst_user").
+		Where("phone = ? AND deleted_at IS NULL", phone).
+		First(&user).
+		Error; err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 func NewUserRepository(db *gorm.DB) users.UserRepositoryInterface {
 	return &userRepository{db}
 }
