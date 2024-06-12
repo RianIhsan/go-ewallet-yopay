@@ -1,14 +1,14 @@
+# YoPAY
 
-# YonPay
+A Mini E-wallet integrated with a payment gateway.
 
-Sebauh Mini E-wallet yang sudah terintegrasi dengan payment gateway,
+## Features
+- Get Information User
+- Authentication (Login, Register)
+- Charge Balance
+- Get Balance
 
-## Fitur
-- Authentication(Login, Register)
-- Charge Balance (TopUp)
-- Get Amount
-
-## Techstack
+## Tech Stack
 - Golang
 - Fiber
 - Postgres
@@ -16,7 +16,10 @@ Sebauh Mini E-wallet yang sudah terintegrasi dengan payment gateway,
 - Argon
 - Midtrans
 
-## Next Fitur
+## Next Features
 - Withdraw
-- Transfer
+- ~~Transfer~~ (Done)
 - Paylater
+
+:label: I still need suggestions and feedback for the development of this application. If you want to contribute, please PM me on [Instagram](https://www.instagram.com/_imriann28/), or you can create an issue in this repository. Thank you.
+
