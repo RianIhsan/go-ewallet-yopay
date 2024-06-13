@@ -124,6 +124,29 @@ func (t *topUpRepo) UpdateTotalBalanceByPhone(phone string, totalBalance float64
 	return nil
 }
 
+func (t *topUpRepo) CreateWithdrawToken(newToken *entities.MstWithdrawBalance) (*entities.MstWithdrawBalance, error) {
+	err := t.db.Create(newToken).Error
+	if err != nil {
+		return nil, err
+	}
+	return newToken, nil
+}
+
+func (t *topUpRepo) GetWithdrawByToken(token int) (*entities.MstWithdrawBalance, error) {
+	var withdraw *entities.MstWithdrawBalance
+	if err := t.db.Where("token = ? ", token).First(&withdraw).Error; err != nil {
+		return nil, err
+	}
+	return withdraw, nil
+}
+
+func (t *topUpRepo) UpdateWithdrawStatus(withdraw *entities.MstWithdrawBalance) error {
+	if err := t.db.Save(withdraw).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func NewTopUpRepository(db *gorm.DB, coreClient coreapi.Client) topup.TopUpRespositoryInterface {
 	return &topUpRepo{
 		db:         db,

@@ -26,4 +26,6 @@ func BootTopUpBalanceRoute(app *fiber.App, handler topup.TopUpHandlerInterface, 
 	topUpGroup.Post("/callback", handler.CallBack)
 	topUpGroup.Get("/total", middleware.Protected(jwtMiddleware, userService), handler.GetTotalBalance)
 	topUpGroup.Post("/transfer", middleware.Protected(jwtMiddleware, userService), handler.TransferBalance)
+	topUpGroup.Post("/withdraw", middleware.Protected(jwtMiddleware, userService), handler.CreateTokenWithdraw)
+	topUpGroup.Post("/confirm-withdraw", middleware.Protected(jwtMiddleware, userService), handler.ConfirmWithdraw)
 }
