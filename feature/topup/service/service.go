@@ -12,6 +12,8 @@ import (
 	"github.com/midtrans/midtrans-go"
 	"github.com/midtrans/midtrans-go/coreapi"
 	"gorm.io/gorm"
+	"math/rand"
+	"time"
 )
 
 type topUpService struct {
@@ -239,6 +241,65 @@ func isValidPaymentMethod(method string) bool {
 		"cimb":          true,
 	}
 	return validPaymentMethods[method]
+}
+
+func (t topUpService) CreateTokenWithdraw(userId int, req dto.WithdrawBalanceRequest) (*dto.WithdrawBalanceResponse, error) {
+	user, err := t.userService.GetId(userId)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+	if user.TotalBalance < req.Amount {
+		return nil, errors.New("insufficient balance")
+	}
+	token := rand.Intn(900000) + 100000
+	expiredToken := time.Now().Add(1 * time.Hour).Unix()
+
+	withDraw := &entities.MstWithdrawBalance{
+		UserId:       userId,
+		Amount:       req.Amount,
+		Provider:     req.Provider,
+		Token:        token,
+		TokenExpired: expiredToken,
+	}
+
+	tokenWd, err := t.topUpRepo.CreateWithdrawToken(withDraw)
+	if err != nil {
+		return nil, errors.New("failed to create withdraw token")
+	}
+	return &dto.WithdrawBalanceResponse{
+		Token:        tokenWd.Token,
+		TokenExpired: tokenWd.TokenExpired,
+	}, nil
+}
+
+func (t topUpService) GetWithdrawByToken(userId int, req dto.ConfirmWithdrawBalanceRequest) error {
+	withdraw, err := t.topUpRepo.GetWithdrawByToken(req.Token)
+	if err != nil {
+		return errors.New("invalid token")
+	}
+	if time.Now().Unix() > withdraw.TokenExpired {
+		return errors.New("token expired")
+	}
+	if withdraw.Status != "pending" {
+		return errors.New("withdraw already processed")
+	}
+
+	user, err := t.userService.GetId(userId)
+	if err != nil {
+		return errors.New("user not found")
+	}
+	user.TotalBalance -= withdraw.Amount
+	withdraw.Status = "success"
+
+	err = t.topUpRepo.UpdateWithdrawStatus(withdraw)
+	if err != nil {
+		return errors.New("failed to update withdraw status")
+	}
+	err = t.topUpRepo.UpdateUserTotalBalance(user.Id, user.TotalBalance)
+	if err != nil {
+		return errors.New("failed to update user balance")
+	}
+	return nil
 }
 
 func NewTopUpService(topUpRepo topup.TopUpRespositoryInterface, userService users.UserServiceInterface, generatorId generator.GeneratorInterface) topup.TopUpServiceInterface {

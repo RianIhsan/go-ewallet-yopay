@@ -98,6 +98,46 @@ func (t *topUpHandler) TransferBalance(ctx *fiber.Ctx) error {
 	return response.SendStatusOkResponse(ctx, "success transfer balance")
 }
 
+func (t *topUpHandler) CreateTokenWithdraw(ctx *fiber.Ctx) error {
+	currentUser, _ := ctx.Locals("CurrentUser").(*entities.MstUser)
+	if currentUser == nil {
+		return response.SendStatusUnauthorized(ctx, "access denied")
+	}
+
+	var payload dto.WithdrawBalanceRequest
+	if err := ctx.BodyParser(&payload); err != nil {
+		return response.SendStatusBadRequest(ctx, "invalid request")
+	}
+	if err := validator.ValidateStruct(payload); err != nil {
+		return response.SendStatusBadRequest(ctx, "error validating payload")
+	}
+	result, err := t.topUpService.CreateTokenWithdraw(currentUser.Id, payload)
+	if err != nil {
+		return response.SendStatusBadRequest(ctx, "failed to create token withdraw: "+err.Error())
+	}
+	return response.SendStatusCreatedWithDataResponse(ctx, "success create token withdraw", result)
+}
+
+func (t *topUpHandler) ConfirmWithdraw(ctx *fiber.Ctx) error {
+	currentUser, _ := ctx.Locals("CurrentUser").(*entities.MstUser)
+	if currentUser == nil {
+		return response.SendStatusUnauthorized(ctx, "access denied")
+	}
+
+	var payload dto.ConfirmWithdrawBalanceRequest
+	if err := ctx.BodyParser(&payload); err != nil {
+		return response.SendStatusBadRequest(ctx, "invalid request")
+	}
+	if err := validator.ValidateStruct(payload); err != nil {
+		return response.SendStatusBadRequest(ctx, "error validating payload")
+	}
+	err := t.topUpService.GetWithdrawByToken(currentUser.Id, payload)
+	if err != nil {
+		return response.SendStatusBadRequest(ctx, "failed to confirm withdraw: "+err.Error())
+	}
+	return response.SendStatusOkResponse(ctx, "success confirm withdraw, balance has been reduced")
+}
+
 func NewTopUpHandler(topUpService topup.TopUpServiceInterface) topup.TopUpHandlerInterface {
 	return &topUpHandler{
 		topUpService: topUpService,

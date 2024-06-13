@@ -19,3 +19,17 @@ type SendNotificationPaymentRequest struct {
 	Title         string `json:"title"`
 	Body          string `json:"body"`
 }
+
+type WithdrawBalanceRequest struct {
+	Amount   float64 `json:"amount" validate:"required"`
+	Provider string  `json:"provider" validate:"required"`
+}
+
+type WithdrawBalanceResponse struct {
+	Token        int   `json:"token"`
+	TokenExpired int64 `json:"token_expired"`
+}
+
+type ConfirmWithdrawBalanceRequest struct {
+	Token int `json:"token" validate:"required"`
+}

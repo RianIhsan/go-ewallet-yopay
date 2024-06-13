@@ -36,6 +36,7 @@ func MigrateTable(db *gorm.DB) {
 	err := db.AutoMigrate(
 		entities.MstUser{},
 		entities.MstBalance{},
+		entities.MstWithdrawBalance{},
 	)
 	if err != nil {
 		log.Fatal("Failed to migrate table", err.Error())
