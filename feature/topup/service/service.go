@@ -7,7 +7,7 @@ import (
 	"github.com/RianIhsan/go-topup-midtrans/feature/topup"
 	"github.com/RianIhsan/go-topup-midtrans/feature/topup/dto"
 	"github.com/RianIhsan/go-topup-midtrans/feature/users"
-	generator "github.com/RianIhsan/go-topup-midtrans/utils/random"
+	generator "github.com/RianIhsan/go-topup-midtrans/utils/genrator"
 	"github.com/gofiber/fiber/v2/log"
 	"github.com/midtrans/midtrans-go"
 	"github.com/midtrans/midtrans-go/coreapi"
