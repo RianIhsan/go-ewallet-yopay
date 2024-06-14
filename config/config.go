@@ -8,10 +8,11 @@ import (
 )
 
 type Config struct {
-	AppPort  int
-	Secret   string
-	Database database
-	Midtrans midtrans
+	AppPort    int
+	Secret     string
+	Database   database
+	Midtrans   midtrans
+	Cloudinary cloudinary
 }
 
 type database struct {
@@ -25,6 +26,12 @@ type database struct {
 type midtrans struct {
 	ClientKey string
 	ServerKey string
+}
+
+type cloudinary struct {
+	CLoudiName   string
+	CloudiKey    string
+	CloudiSecret string
 }
 
 func loadConfig() *Config {
@@ -81,6 +88,16 @@ func loadConfig() *Config {
 
 	if value, found := os.LookupEnv("MSKEY"); found {
 		res.Midtrans.ServerKey = value
+	}
+
+	if value, found := os.LookupEnv("CLDKEY"); found {
+		res.Cloudinary.CloudiKey = value
+	}
+	if value, found := os.LookupEnv("CLDNAME"); found {
+		res.Cloudinary.CLoudiName = value
+	}
+	if value, found := os.LookupEnv("CLDSECRET"); found {
+		res.Cloudinary.CloudiSecret = value
 	}
 
 	return res

@@ -14,11 +14,13 @@ import (
 	userService "github.com/RianIhsan/go-topup-midtrans/feature/users/service"
 	"github.com/RianIhsan/go-topup-midtrans/router"
 	"github.com/RianIhsan/go-topup-midtrans/utils/db"
+	generator "github.com/RianIhsan/go-topup-midtrans/utils/genrator"
 	"github.com/RianIhsan/go-topup-midtrans/utils/hashing"
 	"github.com/RianIhsan/go-topup-midtrans/utils/jwtToken"
 	"github.com/RianIhsan/go-topup-midtrans/utils/payment"
-	generator "github.com/RianIhsan/go-topup-midtrans/utils/random"
+	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
@@ -41,12 +43,19 @@ func main() {
 	coreApi := payment.InitMidtransCore(*initConfig)
 	generatorId := generator.NewGeneratorUUID(initDB)
 
+	cld, err := cloudinary.NewFromParams(initConfig.Cloudinary.CLoudiName, initConfig.Cloudinary.CloudiKey, initConfig.Cloudinary.CloudiSecret)
+	if err != nil {
+		log.Fatalf("Failed to initialize Cloudinary, %v", err)
+	}
+
+	qrCodeGen := generator.NewQrGenerator(cld)
+
 	userRepository := userRepo.NewUserRepository(initDB)
 	userService := userService.NewUserService(userRepository)
 	userHandler := userHandler.NewUserHandler(userService)
 
 	authRepository := authRepo.NewAuthRepository(initDB)
-	authService := authService.NewAuthService(authRepository, userService, hashing, jwtInterface)
+	authService := authService.NewAuthService(authRepository, userService, hashing, jwtInterface, qrCodeGen)
 	authHandler := authHandler.NewAuthHandler(authService)
 
 	topUpRepository := topupRepo.NewTopUpRepository(initDB, coreApi)

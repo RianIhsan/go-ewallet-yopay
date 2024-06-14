@@ -9,6 +9,7 @@ type MstUser struct {
 	Password     string               `json:"password"`
 	Phone        string               `json:"phone"`
 	Balances     []MstBalance         `gorm:"foreignKey:UserId"`
+	QRCode       string               `json:"qr_code"`
 	Withdraw     []MstWithdrawBalance `gorm:"foreignKey:UserId"`
 	TotalBalance float64              `gorm:"column:total_balance" json:"total_balance"`
 	gorm.Model

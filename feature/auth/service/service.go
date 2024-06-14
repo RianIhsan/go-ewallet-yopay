@@ -6,6 +6,7 @@ import (
 	"github.com/RianIhsan/go-topup-midtrans/feature/auth"
 	"github.com/RianIhsan/go-topup-midtrans/feature/auth/dto"
 	"github.com/RianIhsan/go-topup-midtrans/feature/users"
+	generator "github.com/RianIhsan/go-topup-midtrans/utils/genrator"
 	"github.com/RianIhsan/go-topup-midtrans/utils/hashing"
 	"github.com/RianIhsan/go-topup-midtrans/utils/jwtToken"
 )
@@ -15,6 +16,7 @@ type authService struct {
 	userService users.UserServiceInterface
 	hashing     hashing.HashInterface
 	jwt         jwtToken.IJwt
+	genQR       generator.QrCodeInterface
 }
 
 func (a authService) Login(user *dto.LoginRequest) (*entities.MstUser, string, error) {
@@ -50,6 +52,8 @@ func (a authService) Register(newUser *dto.RegisterRequest) (*entities.MstUser, 
 		Password: hashedPassword,
 		Phone:    newUser.Phone,
 	}
+	err = a.genQR.GenerateQRCode(data)
+
 	user, err := a.repo.InsertUser(data)
 	if err != nil {
 		return nil, errors.New("failed create account")
@@ -61,6 +65,8 @@ func NewAuthService(
 	repo auth.AuthRepositoryInterface,
 	userService users.UserServiceInterface,
 	hashing hashing.HashInterface,
-	jwtToken jwtToken.IJwt) auth.AuthServiceInterface {
-	return &authService{repo, userService, hashing, jwtToken}
+	jwtToken jwtToken.IJwt,
+	genQR generator.QrCodeInterface,
+) auth.AuthServiceInterface {
+	return &authService{repo, userService, hashing, jwtToken, genQR}
 }
