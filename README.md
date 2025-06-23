@@ -37,5 +37,5 @@ A Mini E-wallet integrated with a payment gateway.
     - **Confirm Withdraw**: Confirms the withdrawal of funds. Path: `/v1/balance/confirm-withdraw`
 
 
-:label: I still need suggestions and feedback for the development of this application. If you want to contribute, please PM me on [Instagram](https://www.instagram.com/_imriann28/), or you can create an issue in this repository. Thank you.
+:label: I still need suggestions and feedback for the development of this application. If you want to contribute, please PM me on [Instagram](https://www.instagram.com/rianihsan28/), or you can create an issue in this repository. Thank you.
 
